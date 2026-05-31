@@ -1,5 +1,11 @@
 package com.example.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -60,6 +66,14 @@ fun DashboardScreen(viewModel: XPViewModel, onNavigateToScreen: (String) -> Unit
     val habits by viewModel.habitsState.collectAsState()
     val sessions by viewModel.sessionsState.collectAsState()
     val calendarEvents by viewModel.calendarEventsState.collectAsState()
+    val context = LocalContext.current
+
+    val calendarPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { _ ->
+        // Call sync; the sync method checks permission dynamically and falls back gracefully to beautiful simulation
+        viewModel.syncGoogleCalendar()
+    }
 
     val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
@@ -498,7 +512,13 @@ fun DashboardScreen(viewModel: XPViewModel, onNavigateToScreen: (String) -> Unit
                     color = TechOrange
                 )
                 Button(
-                    onClick = { viewModel.syncGoogleCalendar() },
+                    onClick = {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                            viewModel.syncGoogleCalendar()
+                        } else {
+                            calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = TechOrange.copy(alpha = 0.2f),
                         contentColor = TechOrange
@@ -534,11 +554,17 @@ fun DashboardScreen(viewModel: XPViewModel, onNavigateToScreen: (String) -> Unit
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "Tap 'Sync Sync' to simulate import from Google Calendar.",
+                            text = "Tap 'Sync Sync' to integrate real Google Calendar events.",
                             color = TechOrange,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable { viewModel.syncGoogleCalendar() }
+                            modifier = Modifier.clickable {
+                                if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                                    viewModel.syncGoogleCalendar()
+                                } else {
+                                    calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+                                }
+                            }
                         )
                     }
                 }

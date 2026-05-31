@@ -20,7 +20,10 @@ data class UserEntity(
     val currentStreak: Int = 0,
     val longestStreak: Int = 0,
     val lastActiveDate: String = "", // "yyyy-MM-dd"
-    val unlockedBadges: String = "" // Comma-separated list of values like "Beginner,Study Warrior"
+    val unlockedBadges: String = "", // Comma-separated list of values like "Beginner,Study Warrior"
+    val email: String = "",
+    val isLoggedIn: Boolean = false,
+    val loginProvider: String = "" // "Google", "Facebook", "Email", "Guest"
 )
 
 @Entity(tableName = "tasks")
@@ -233,7 +236,7 @@ interface CalendarEventDao {
         XpLogEntity::class,
         CalendarEventEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class XPDatabase : RoomDatabase() {

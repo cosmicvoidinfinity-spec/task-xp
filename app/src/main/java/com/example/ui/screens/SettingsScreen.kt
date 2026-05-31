@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +30,7 @@ fun SettingsScreen(
     onToggleTheme: (Boolean) -> Unit,
     onResetOnboarding: () -> Unit
 ) {
+    val user by viewModel.userState.collectAsState()
     var notificationsEnabled by remember { mutableStateOf(true) }
     var mockBackupSynched by remember { mutableStateOf(false) }
 
@@ -57,7 +59,93 @@ fun SettingsScreen(
             color = TechOrange
         )
 
-        Divider(color = BorderGray, thickness = 0.5.dp)
+        HorizontalDivider(color = BorderGray, thickness = 0.5.dp)
+
+        // 0. Neural Identity Account status Card
+        Card(
+            modifier = Modifier.fillMaxWidth().testTag("auth_status_settings_card"),
+            border = BorderStroke(0.5.dp, BorderGray),
+            colors = CardDefaults.cardColors(containerColor = MatteBlack)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    "NEURAL IDENTITY STATUS (ACCOUNT)",
+                    color = TechOrange,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = if (user?.email.isNullOrBlank()) "Offline Guest Planner" else user!!.name,
+                            color = PureWhite,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (user?.email.isNullOrBlank()) "Local client storage" else "Email: ${user!!.email}",
+                            color = MutedTextDark,
+                            fontSize = 11.sp
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Linked via: ${user?.loginProvider ?: "Guest Profile"}",
+                            color = TechOrange,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(TechOrange.copy(alpha = 0.12f))
+                            .border(0.5.dp, TechOrange, RoundedCornerShape(6.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(Color.Green)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("ACTIVE", color = PureWhite, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                HorizontalDivider(color = BorderGray, thickness = 0.5.dp)
+
+                Button(
+                    onClick = { viewModel.logoutUser() },
+                    colors = ButtonDefaults.buttonColors(containerColor = SlateBlack, contentColor = TechOrange),
+                    border = BorderStroke(1.dp, TechOrange.copy(alpha = 0.5f)),
+                    modifier = Modifier.fillMaxWidth().height(40.dp),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "logout provider",
+                            modifier = Modifier.size(16.dp),
+                            tint = TechOrange
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("LOGOUT SECURE SESSION", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                    }
+                }
+            }
+        }
 
         // 1. Core Visual Matrix Control
         Card(

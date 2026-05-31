@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
                     val viewModel: XPViewModel = viewModel()
                     val user by viewModel.userState.collectAsState()
 
-                    if (user == null) {
+                    if (user == null || !user!!.isLoggedIn) {
                         // User has not logged details yet: launch onboarding stage
                         OnboardingScreen(viewModel = viewModel)
                     } else {

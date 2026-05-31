@@ -54,9 +54,9 @@ class XPViewModel(application: Application) : AndroidViewModel(application) {
     // ONBOARDING SETUP ACTION
     // ==========================================
 
-    fun completeOnboarding(name: String, studentClass: String, goalHours: Float, initialHabits: List<String>) {
+    fun completeOnboarding(name: String, studentClass: String, goalHours: Float, initialHabits: List<String>, email: String = "", loginProvider: String = "") {
         viewModelScope.launch {
-            repository.setupStarterOnboarding(name, studentClass, goalHours, initialHabits)
+            repository.setupStarterOnboarding(name, studentClass, goalHours, initialHabits, email, loginProvider)
         }
     }
 
@@ -334,6 +334,18 @@ class XPViewModel(application: Application) : AndroidViewModel(application) {
     fun destructAvatarProfile() {
         viewModelScope.launch {
             repository.clearUserAndData()
+        }
+    }
+
+    fun signInUser(email: String, provider: String) {
+        viewModelScope.launch {
+            repository.signInUser(email, provider)
+        }
+    }
+
+    fun logoutUser() {
+        viewModelScope.launch {
+            repository.logoutUser()
         }
     }
 }

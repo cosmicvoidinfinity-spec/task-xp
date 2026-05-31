@@ -30,20 +30,24 @@ class XPRepository(context: Context) {
     private fun getTodayDateString(): String = dateFormat.format(Date())
 
     // Onboarding starter values
-    suspend fun setupStarterOnboarding(name: String, studentClass: String, goalHours: Float, habitList: List<String>) {
+    suspend fun setupStarterOnboarding(name: String, studentClass: String, goalHours: Float, habitList: List<String>, email: String = "", loginProvider: String = "") {
         val today = getTodayDateString()
+        val existing = userDao.getUserSync()
         val defaultUser = UserEntity(
             id = 1,
-            name = name.ifBlank { "Class 9 Student" },
+            name = name.ifBlank { existing?.name ?: "Class 9 Student" },
             studentClass = studentClass.ifBlank { "Class 9" },
             studyGoalHours = if (goalHours > 0) goalHours else 3.0f,
             habitGoals = habitList.joinToString(","),
-            totalXp = 50, // Starter bonus!
-            level = 1,
-            currentStreak = 1,
-            longestStreak = 1,
+            totalXp = (existing?.totalXp ?: 0) + 50, // Starter bonus!
+            level = existing?.level ?: 1,
+            currentStreak = existing?.currentStreak ?: 1,
+            longestStreak = existing?.longestStreak ?: 1,
             lastActiveDate = today,
-            unlockedBadges = "Beginner"
+            unlockedBadges = existing?.unlockedBadges.takeIf { !it.isNullOrBlank() } ?: "Beginner",
+            email = email.ifBlank { existing?.email ?: "" },
+            isLoggedIn = true,
+            loginProvider = loginProvider.ifBlank { existing?.loginProvider ?: "" }
         )
         userDao.insertOrUpdateUser(defaultUser)
         logXpGain(50, "Completed Planner SetupOnboarding")
@@ -471,5 +475,35 @@ class XPRepository(context: Context) {
 
     suspend fun clearUserAndData() {
         userDao.deleteUser()
+    }
+
+    suspend fun signInUser(email: String, provider: String) {
+        val today = getTodayDateString()
+        val existing = userDao.getUserSync()
+        val capName = email.substringBefore("@")
+            .split(".", "_", "-")
+            .joinToString(" ") { it.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase(Locale.getDefault()) else char.toString() } }
+        val user = existing?.copy(
+            email = email,
+            loginProvider = provider,
+            isLoggedIn = true
+        ) ?: UserEntity(
+            id = 1,
+            name = capName,
+            email = email,
+            loginProvider = provider,
+            isLoggedIn = true,
+            lastActiveDate = today,
+            totalXp = 0,
+            level = 1
+        )
+        userDao.insertOrUpdateUser(user)
+    }
+
+    suspend fun logoutUser() {
+        val existing = userDao.getUserSync()
+        if (existing != null) {
+            userDao.insertOrUpdateUser(existing.copy(isLoggedIn = false))
+        }
     }
 }

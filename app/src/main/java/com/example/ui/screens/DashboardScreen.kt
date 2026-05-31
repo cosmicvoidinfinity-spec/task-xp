@@ -339,7 +339,7 @@ fun DashboardScreen(viewModel: XPViewModel, onNavigateToScreen: (String) -> Unit
                     text = "View All",
                     color = MutedTextDark,
                     fontSize = 12.sp,
-                    modifier = Modifier.clickable { onNavigateToScreen("Tasks") }
+                    modifier = Modifier.clickable { onNavigateToScreen("Quests") }
                 )
             }
         }

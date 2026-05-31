@@ -265,7 +265,7 @@ class XPRepository(context: Context) {
     }
 
     private suspend fun checkAllTasksCompletedBonus() {
-        val allTasks = db.taskDao().getAllTasksFlow().firstOrNull() ?: return
+        val allTasks = db.taskDao().getAllTasksSync()
         val currentTasks = allTasks.filter { !it.isCompleted }
         if (currentTasks.isEmpty() && allTasks.isNotEmpty()) {
             // All tasks completed!
@@ -461,5 +461,15 @@ class XPRepository(context: Context) {
             calendarEventDao.insertCalendarEvent(e)
         }
         logXpGain(50, "Google Calendar Successfully Synchronized")
+    }
+
+    suspend fun updateUserStudyGoal(hours: Float) {
+        val user = userDao.getUserSync() ?: return
+        userDao.insertOrUpdateUser(user.copy(studyGoalHours = hours))
+        logXpGain(10, "Adjusted daily study goal threshold to $hours hours")
+    }
+
+    suspend fun clearUserAndData() {
+        userDao.deleteUser()
     }
 }

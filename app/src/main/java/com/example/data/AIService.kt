@@ -158,6 +158,92 @@ object AIService {
         }
     }
 
+    suspend fun executeAiCommand(commandText: String): String {
+        val apiKey = BuildConfig.GEMINI_API_KEY
+        if (apiKey.isBlank() || apiKey == "MY_GEMINI_API_KEY") {
+            return fallbackOfflineParse(commandText)
+        }
+
+        val prompt = """
+            Return a valid JSON array containing action command objects parsed from the student instruction: "$commandText"
+
+            Do NOT add conversational prose, other explanations, or any formatting beyond raw valid JSON. 
+            Supported Action Command Schemas (always return inside a JSON array [ ... ]):
+            
+            1. Create Task:
+               {"action": "add_task", "title": "Homework description", "category": "School/Study/Homework/YouTube/Personal/Health/Family/Reading", "priority": "Low/Medium/High"}
+            
+            2. Complete Task:
+               {"action": "complete_task", "title": "Exact or partial title of task to check off"}
+
+            3. Create Habit:
+               {"action": "add_habit", "name": "Habit description"}
+
+            4. Complete Habit (ticking habit done for the day):
+               {"action": "complete_habit", "name": "Exact or partial name of habit to log today"}
+
+            5. Log manual XP:
+               {"action": "add_xp", "amount": 100, "reason": "Reason for logging"}
+
+            6. Update Study Hour Goal:
+               {"action": "update_study_goal", "hours": 4.5}
+
+            7. Create 30-Day Grid Challenge/Mission:
+               {"action": "create_challenge", "title": "Challenge Name", "challengeType": "Syllabus Theme"}
+
+            Command to analyze: "$commandText"
+            JSON Response:
+        """.trimIndent()
+
+        val request = GenerateContentRequest(
+            contents = listOf(Content(parts = listOf(Part(text = prompt)))),
+            systemInstruction = Content(parts = listOf(Part(text = "You are Vexa DB Engine. You strictly output raw JSON arrays of actions from the text instruction. No chat preamble, no notes, only raw valid JSON arrays.")))
+        )
+
+        return try {
+            val response = RetrofitClient.apiService.generateContent(request, apiKey)
+            val output = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+            output ?: "[]"
+        } catch (e: Exception) {
+            e.printStackTrace()
+            fallbackOfflineParse(commandText)
+        }
+    }
+
+    private fun fallbackOfflineParse(text: String): String {
+        val cleaned = text.lowercase()
+        val actions = mutableListOf<String>()
+
+        if (cleaned.contains("add task") || cleaned.contains("create task") || cleaned.contains("quest")) {
+            val title = text.replace(Regex("(?i)add task|create task|quest"), "").trim()
+            val priority = if (cleaned.contains("high")) "High" else if (cleaned.contains("low")) "Low" else "Medium"
+            val category = if (cleaned.contains("math")) "Study" else if (cleaned.contains("home")) "Homework" else "School"
+            actions.add("""{"action": "add_task", "title": "$title", "category": "$category", "priority": "$priority"}""")
+        } else if (cleaned.contains("add habit") || cleaned.contains("create habit")) {
+            val name = text.replace(Regex("(?i)add habit|create habit"), "").trim()
+            actions.add("""{"action": "add_habit", "name": "$name"}""")
+        } else if (cleaned.contains("add xp") || cleaned.contains("give xp") || cleaned.contains("log xp") || cleaned.contains("xp")) {
+            val amountMatch = Regex("\\d+").find(cleaned)
+            val amount = amountMatch?.value?.toIntOrNull() ?: 50
+            val reason = text.replace(Regex("(?i)\\d+|add xp|give xp|log xp|xp"), "").trim().ifBlank { "Chrono AI Command" }
+            actions.add("""{"action": "add_xp", "amount": $amount, "reason": "$reason"}""")
+        } else if (cleaned.contains("study hour") || cleaned.contains("study goal") || cleaned.contains("goal hours")) {
+            val hoursMatch = Regex("(\\d+\\.\\d+|\\d+)").find(cleaned)
+            val hours = hoursMatch?.value?.toFloatOrNull() ?: 4.0f
+            actions.add("""{"action": "update_study_goal", "hours": $hours}""")
+        } else if (cleaned.contains("complete task") || cleaned.contains("done task") || cleaned.contains("finish task")) {
+            val title = text.replace(Regex("(?i)complete task|done task|finish task"), "").trim()
+            actions.add("""{"action": "complete_task", "title": "$title"}""")
+        } else if (cleaned.contains("complete habit") || cleaned.contains("done habit") || cleaned.contains("tick habit")) {
+            val name = text.replace(Regex("(?i)complete habit|done habit|tick habit"), "").trim()
+            actions.add("""{"action": "complete_habit", "name": "$name"}""")
+        } else {
+            actions.add("""{"action": "add_task", "title": "$text", "category": "Study", "priority": "Medium"}""")
+        }
+
+        return "[" + actions.joinToString(",") + "]"
+    }
+
     private fun generateMockAnalysis(
         userName: String,
         studentClass: String,

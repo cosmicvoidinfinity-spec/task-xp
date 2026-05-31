@@ -100,12 +100,18 @@ interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateUser(user: UserEntity)
+
+    @Query("DELETE FROM users WHERE id = 1")
+    suspend fun deleteUser()
 }
 
 @Dao
 interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY isCompleted ASC, deadline ASC, id DESC")
     fun getAllTasksFlow(): Flow<List<TaskEntity>>
+
+    @Query("SELECT * FROM tasks")
+    suspend fun getAllTasksSync(): List<TaskEntity>
 
     @Query("SELECT * FROM tasks WHERE isCompleted = 1")
     suspend fun getCompletedTasksSync(): List<TaskEntity>

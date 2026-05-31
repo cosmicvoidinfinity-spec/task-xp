@@ -216,4 +216,124 @@ class XPViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    // AI DIRECT-COMMAND TERMINAL CORE
+    val aiCommandRunning = MutableStateFlow(false)
+    val aiCommandLogs = MutableStateFlow<List<String>>(emptyList())
+
+    fun executeQuantumAICommand(prompt: String) {
+        if (prompt.isBlank()) return
+        aiCommandRunning.value = true
+        aiCommandLogs.value = listOf(
+            "[VEXA TERMINAL]: Launching cybernetic database link...",
+            "[VEXA TERMINAL]: Processing instruction: \"$prompt\""
+        )
+
+        viewModelScope.launch {
+            try {
+                val rawResult = repository.run { 
+                    // Call Direct AI command module
+                    AIService.executeAiCommand(prompt) 
+                }
+                
+                aiCommandLogs.value = aiCommandLogs.value + "[VEXA TERMINAL]: Parsing telemetry telemetry payload..."
+
+                // Extract substring between first '[' and last ']' to handle any markdown/conversational formatting cleanly
+                var cleanedJson = rawResult.trim()
+                val startIdx = cleanedJson.indexOf('[')
+                val endIdx = cleanedJson.lastIndexOf(']')
+                if (startIdx != -1 && endIdx != -1 && endIdx > startIdx) {
+                    cleanedJson = cleanedJson.substring(startIdx, endIdx + 1)
+                }
+
+                aiCommandLogs.value = aiCommandLogs.value + "[VEXA TERMINAL]: Executing directives..."
+
+                val jsonArray = org.json.JSONArray(cleanedJson)
+                if (jsonArray.length() == 0) {
+                    aiCommandLogs.value = aiCommandLogs.value + "[VEXA WARNING]: Empty execution package received."
+                }
+
+                for (i in 0 until jsonArray.length()) {
+                    val obj = jsonArray.getJSONObject(i)
+                    val action = obj.getString("action")
+
+                    when (action) {
+                        "add_task" -> {
+                            val title = obj.getString("title")
+                            val cat = if (obj.has("category")) obj.getString("category") else "Study"
+                            val prio = if (obj.has("priority")) obj.getString("priority") else "Medium"
+                            repository.insertTask(title, cat, prio, 0, 0)
+                            aiCommandLogs.value = aiCommandLogs.value + "▶ CREATE TASK: \"$title\" | Cat: $cat | Priority: $prio"
+                        }
+                        "add_habit" -> {
+                            val name = obj.getString("name")
+                            repository.insertHabit(name)
+                            aiCommandLogs.value = aiCommandLogs.value + "▶ CREATE HABIT: \"$name\""
+                        }
+                        "add_xp" -> {
+                            val amt = obj.getInt("amount")
+                            val reason = if (obj.has("reason")) obj.getString("reason") else "Matrix Overcharge"
+                            repository.logXpGain(amt, reason)
+                            aiCommandLogs.value = aiCommandLogs.value + "▶ XP GRANTED: +$amt XP for \"$reason\""
+                        }
+                        "update_study_goal" -> {
+                            val hours = obj.getDouble("hours").toFloat()
+                            repository.updateUserStudyGoal(hours)
+                            aiCommandLogs.value = aiCommandLogs.value + "▶ STUDY METRIC CHANGED: Daily hours set to $hours"
+                        }
+                        "create_challenge" -> {
+                            val title = obj.getString("title")
+                            val type = if (obj.has("challengeType")) obj.getString("challengeType") else "Syllabus Board Master"
+                            repository.insertChallenge(title, type)
+                            aiCommandLogs.value = aiCommandLogs.value + "▶ LAUNCH 30-DAY MISSION: \"$title\""
+                        }
+                        "complete_task" -> {
+                            val titleKeyword = obj.getString("title")
+                            val match = tasksState.value.firstOrNull { 
+                                it.title.contains(titleKeyword, ignoreCase = true) && !it.isCompleted 
+                            }
+                            if (match != null) {
+                                repository.toggleTaskComplete(match.id)
+                                aiCommandLogs.value = aiCommandLogs.value + "▶ QUEST CHECKED: Completed \"${match.title}\""
+                            } else {
+                                aiCommandLogs.value = aiCommandLogs.value + "▶ ERROR: Task matching \"$titleKeyword\" not found or already done."
+                            }
+                        }
+                        "complete_habit" -> {
+                            val nameKeyword = obj.getString("name")
+                            val match = habitsState.value.firstOrNull { 
+                                it.name.contains(nameKeyword, ignoreCase = true) 
+                            }
+                            if (match != null) {
+                                val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+                                if (!match.completionDates.split(",").contains(today)) {
+                                    repository.toggleHabitCompletedToday(match.id)
+                                    aiCommandLogs.value = aiCommandLogs.value + "▶ HABIT SECURED: Completed daily habit \"${match.name}\""
+                                } else {
+                                    aiCommandLogs.value = aiCommandLogs.value + "▶ HABIT ALREADY SECURED: \"${match.name}\""
+                                }
+                            } else {
+                                aiCommandLogs.value = aiCommandLogs.value + "▶ ERROR: Habit matching \"$nameKeyword\" not found."
+                            }
+                        }
+                        else -> {
+                            aiCommandLogs.value = aiCommandLogs.value + "▶ WARNING: Action \"$action\" ignored."
+                        }
+                    }
+                }
+                aiCommandLogs.value = aiCommandLogs.value + "[VEXA TERMINAL]: Transaction logged. Database updated successfully."
+            } catch (e: Exception) {
+                e.printStackTrace()
+                aiCommandLogs.value = aiCommandLogs.value + "[VEXA TERMINAL ERROR]: Link disrupted: ${e.localizedMessage}"
+            } finally {
+                aiCommandRunning.value = false
+            }
+        }
+    }
+
+    fun destructAvatarProfile() {
+        viewModelScope.launch {
+            repository.clearUserAndData()
+        }
+    }
 }

@@ -71,6 +71,15 @@ fun MainNavigationContainer(
     var selectedBottomTab by remember { mutableStateOf("Home") }
     var selectedArsenalSubTab by remember { mutableStateOf("Missions") }
 
+    // Global Add Task dialog state
+    var showGlobalAddTaskDialog by remember { mutableStateOf(false) }
+    var globalTaskTitle by remember { mutableStateOf("") }
+    var globalTaskCategory by remember { mutableStateOf("Study") }
+    var globalTaskPriority by remember { mutableStateOf("Medium") }
+
+    val categoriesList = listOf("School", "Study", "Homework", "YouTube", "Personal", "Health", "Family", "Reading")
+    val prioritiesList = listOf("Low", "Medium", "High")
+
     Scaffold(
         bottomBar = {
             NavigationBar(
@@ -84,29 +93,36 @@ fun MainNavigationContainer(
                 val navItems = listOf(
                     Triple("Home", Icons.Default.Dashboard, "Home"),
                     Triple("Quests", Icons.Default.CheckCircle, "Quests"),
+                    Triple("AddTask", Icons.Default.Add, "Add Task"),
                     Triple("Habits", Icons.Default.Favorite, "Habits"),
                     Triple("Study", Icons.Default.School, "Study"),
                     Triple("Arsenal", Icons.Default.Extension, "Arsenal")
                 )
 
                 navItems.forEach { (route, icon, label) ->
-                    val isSelected = selectedBottomTab == route
+                    val isSelected = selectedBottomTab == route && route != "AddTask"
                     NavigationBarItem(
                         selected = isSelected,
-                        onClick = { selectedBottomTab = route },
+                        onClick = {
+                            if (route == "AddTask") {
+                                showGlobalAddTaskDialog = true
+                            } else {
+                                selectedBottomTab = route
+                            }
+                        },
                         icon = {
                             Icon(
                                 imageVector = icon,
                                 contentDescription = label,
-                                tint = if (isSelected) TechOrange else MutedTextDark
+                                tint = if (route == "AddTask") TechOrange else if (isSelected) TechOrange else MutedTextDark
                             )
                         },
                         label = {
                             Text(
                                 text = label,
                                 fontSize = 10.sp,
-                                fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal,
-                                color = if (isSelected) TechOrange else MutedTextDark
+                                fontWeight = if (isSelected || route == "AddTask") FontWeight.ExtraBold else FontWeight.Normal,
+                                color = if (route == "AddTask") TechOrange else if (isSelected) TechOrange else MutedTextDark
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
@@ -213,13 +229,8 @@ fun MainNavigationContainer(
                                             isDarkTheme = isDarkTheme,
                                             onToggleTheme = { onToggleTheme(it) },
                                             onResetOnboarding = {
-                                                // Reset local onboarding State Flow
-                                                viewModel.completeOnboarding(
-                                                    name = "",
-                                                    studentClass = "",
-                                                    goalHours = 0f,
-                                                    initialHabits = emptyList()
-                                                )
+                                                // Destruct existing user avatar profile
+                                                viewModel.destructAvatarProfile()
                                                 // Clean navigation anchors
                                                 selectedBottomTab = "Home"
                                                 selectedArsenalSubTab = "Missions"
@@ -233,5 +244,116 @@ fun MainNavigationContainer(
                 }
             }
         }
+    }
+
+    if (showGlobalAddTaskDialog) {
+        AlertDialog(
+            onDismissRequest = { showGlobalAddTaskDialog = false },
+            containerColor = MatteBlack,
+            shape = RoundedCornerShape(32.dp),
+            modifier = Modifier.border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(32.dp)),
+            title = {
+                Text(
+                    "CONSTRUCT NEW QUEST",
+                    fontWeight = FontWeight.Black,
+                    color = TechOrange,
+                    fontSize = 16.sp,
+                    letterSpacing = 1.sp
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    OutlinedTextField(
+                        value = globalTaskTitle,
+                        onValueChange = { globalTaskTitle = it },
+                        label = { Text("Quest Title / Objective") },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = PureWhite,
+                            unfocusedTextColor = PureWhite,
+                            focusedBorderColor = TechOrange,
+                            unfocusedBorderColor = BorderGray,
+                            focusedLabelColor = TechOrange,
+                            unfocusedLabelColor = MutedTextDark
+                        ),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().testTag("add_task_title_input")
+                    )
+
+                    // Category Selector Label
+                    Text("Select Category Module:", color = PureWhite, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        categoriesList.forEach { cat ->
+                            val isSelected = globalTaskCategory == cat
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isSelected) TechOrange else SlateBlack)
+                                    .border(1.dp, if (isSelected) TechOrange else BorderGray, RoundedCornerShape(8.dp))
+                                    .clickable { globalTaskCategory = cat }
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(cat, color = if (isSelected) SolidBlack else PureWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+
+                    // Priority Selector Label
+                    Text("Combat Priority Factor:", color = PureWhite, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        prioritiesList.forEach { prio ->
+                            val isSelected = globalTaskPriority == prio
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isSelected) TechOrange else SlateBlack)
+                                    .border(1.dp, if (isSelected) TechOrange else BorderGray, RoundedCornerShape(8.dp))
+                                    .clickable { globalTaskPriority = prio }
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(prio, color = if (isSelected) SolidBlack else PureWhite, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (globalTaskTitle.isNotBlank()) {
+                            viewModel.createTask(
+                                title = globalTaskTitle,
+                                category = globalTaskCategory,
+                                priority = globalTaskPriority
+                            )
+                            globalTaskTitle = ""
+                            showGlobalAddTaskDialog = false
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = TechOrange, contentColor = SolidBlack),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier.testTag("submit_add_task_button")
+                ) {
+                    Text("FORGE CONFLICT", fontWeight = FontWeight.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showGlobalAddTaskDialog = false }) {
+                    Text("ABORT", color = MutedTextDark)
+                }
+            }
+        )
     }
 }

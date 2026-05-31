@@ -448,7 +448,7 @@ class XPRepository(private val context: Context) {
     }
 
     // Real Google Calendar Account Connection & Sync via CalendarContract
-    suspend fun syncGoogleCalendarAgenda() {
+    suspend fun syncGoogleCalendarAgenda(): Unit = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
         calendarEventDao.clearAllCalendarEvents()
         val calendar = Calendar.getInstance()
         
@@ -494,7 +494,8 @@ class XPRepository(private val context: Context) {
                 val endIdx = c.getColumnIndex(android.provider.CalendarContract.Instances.END)
                 
                 while (c.moveToNext()) {
-                    val title = if (titleIdx != -1) c.getString(titleIdx) else "Unnamed Calendar Event"
+                    val rawTitle = if (titleIdx != -1) c.getString(titleIdx) else null
+                    val title = rawTitle ?: "Unnamed Calendar Event"
                     val begin = if (beginIdx != -1) c.getLong(beginIdx) else startMillis
                     val end = if (endIdx != -1) c.getLong(endIdx) else endMillis
                     realEvents.add(

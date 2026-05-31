@@ -513,10 +513,14 @@ fun DashboardScreen(viewModel: XPViewModel, onNavigateToScreen: (String) -> Unit
                 )
                 Button(
                     onClick = {
-                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                        try {
+                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                                viewModel.syncGoogleCalendar()
+                            } else {
+                                calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+                            }
+                        } catch (e: Exception) {
                             viewModel.syncGoogleCalendar()
-                        } else {
-                            calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
@@ -559,10 +563,14 @@ fun DashboardScreen(viewModel: XPViewModel, onNavigateToScreen: (String) -> Unit
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.clickable {
-                                if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                                try {
+                                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                                        viewModel.syncGoogleCalendar()
+                                    } else {
+                                        calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+                                    }
+                                } catch (e: Exception) {
                                     viewModel.syncGoogleCalendar()
-                                } else {
-                                    calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
                                 }
                             }
                         )

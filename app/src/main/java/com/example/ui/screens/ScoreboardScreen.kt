@@ -83,16 +83,26 @@ fun ScoreboardScreen(viewModel: XPViewModel) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Stats grid block
-        Text(
-            text = "🏅 DOSSIER PERFORMANCE INDEX",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Black,
-            color = TechOrange
-        )
+        Column(modifier = Modifier.padding(bottom = 8.dp)) {
+            Text(
+                text = "ACADEMIC WARRIOR",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp,
+                color = TechOrange
+            )
+            Text(
+                text = "PERFORMANCE INDEX",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Black,
+                color = PureWhite
+            )
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            border = BorderStroke(1.dp, BorderGray),
+            shape = RoundedCornerShape(24.dp),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
             colors = CardDefaults.cardColors(containerColor = MatteBlack)
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

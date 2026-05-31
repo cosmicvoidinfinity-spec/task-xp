@@ -162,12 +162,12 @@ fun DashboardScreen(viewModel: XPViewModel, onNavigateToScreen: (String) -> Unit
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(containerColor = MatteBlack),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
             ) {
                 Column(
-                    modifier = Modifier.padding(20.dp),
+                    modifier = Modifier.padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // Level text & total XP
@@ -178,85 +178,144 @@ fun DashboardScreen(viewModel: XPViewModel, onNavigateToScreen: (String) -> Unit
                     ) {
                         Column {
                             Text(
-                                text = "TACTICAL LEVEL: ${user?.level ?: 1}",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Black,
-                                color = TechOrange
+                                text = "CURRENT STATUS",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.5.sp,
+                                color = Color.White.copy(alpha = 0.5f)
                             )
                             Text(
-                                text = "Next Level in: ${totalLevelBounds.second - (user?.totalXp ?: 0)} XP",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MutedTextDark
+                                text = "LEVEL ${String.format(Locale.US, "%02d", user?.level ?: 1)}",
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Black,
+                                color = PureWhite
                             )
                         }
-                        Text(
-                            text = "${user?.totalXp ?: 0} XP",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Black,
-                            color = PureWhite
-                        )
+                        Box(
+                            modifier = Modifier
+                                .background(TechOrange, RoundedCornerShape(100.dp))
+                                .padding(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "PRO",
+                                color = SolidBlack,
+                                fontWeight = FontWeight.Black,
+                                fontSize = 11.sp
+                            )
+                        }
                     }
 
-                    // Level Up Progress Bar
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        LinearProgressIndicator(
-                            progress = { currentLevelProgress },
+                    // Custom Animated-style XP Bar (Sleek Theme)
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(10.dp)
-                                .clip(RoundedCornerShape(5.dp))
-                                .testTag("score_progress_bar"),
-                            color = TechOrange,
-                            trackColor = BorderGray
-                        )
+                                .height(22.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.4f))
+                                .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+                                .padding(2.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .fillMaxWidth(currentLevelProgress.coerceIn(0.01f, 1f))
+                                    .clip(CircleShape)
+                                    .background(Brush.horizontalGradient(listOf(TechOrange, AmberOrange)))
+                            )
+                        }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("${totalLevelBounds.first} XP", color = MutedTextDark, fontSize = 11.sp)
-                            Text("${totalLevelBounds.second} XP", color = MutedTextDark, fontSize = 11.sp)
+                            Text(
+                                text = "${user?.totalXp ?: 0} / ${totalLevelBounds.second} XP",
+                                color = Color.White.copy(alpha = 0.7f),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            val xpLeft = totalLevelBounds.second - (user?.totalXp ?: 1)
+                            Text(
+                                text = "$xpLeft XP TO LEVEL ${(user?.level ?: 1) + 1}",
+                                color = Color.White.copy(alpha = 0.4f),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                letterSpacing = 0.5.sp
+                            )
                         }
                     }
 
-                    Divider(color = BorderGray, thickness = 1.dp)
+                    Divider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp)
 
-                    // Daily study stats summary
+                    // Daily study stats summary Quick Grid format (Sleek Theme)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                            Text("STUDY SESSION", fontSize = 10.sp, color = MutedTextDark, fontWeight = FontWeight.Bold)
-                            Text(
-                                text = String.format(Locale.US, "%.1f / %.1f h", todayLoggedHours, user?.studyGoalHours ?: 3.0f),
-                                fontWeight = FontWeight.ExtraBold,
-                                color = PureWhite,
-                                fontSize = 15.sp,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
+                        // Study Session Card
+                        Card(
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.3f)),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("STUDY TODAY", fontSize = 9.sp, color = Color.White.copy(alpha = 0.4f), fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                                Row(
+                                    verticalAlignment = Alignment.Bottom,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                ) {
+                                    Text(
+                                        text = String.format(Locale.US, "%.1f", todayLoggedHours),
+                                        fontWeight = FontWeight.Black,
+                                        color = PureWhite,
+                                        fontSize = 24.sp
+                                    )
+                                    Text(
+                                        text = String.format(Locale.US, "/%.1fh", user?.studyGoalHours ?: 3.0f),
+                                        color = Color.White.copy(alpha = 0.3f),
+                                        fontSize = 11.sp,
+                                        modifier = Modifier.padding(bottom = 3.dp, start = 2.dp)
+                                    )
+                                }
+                                Box(modifier = Modifier.padding(top = 8.dp).width(24.dp).height(3.dp).background(TechOrange, CircleShape))
+                            }
                         }
-                        Box(modifier = Modifier.width(1.dp).height(30.dp).background(BorderGray))
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                            Text("TASKS DONE", fontSize = 10.sp, color = MutedTextDark, fontWeight = FontWeight.Bold)
-                            Text(
-                                text = "${todayCompletedTasks.size} done",
-                                fontWeight = FontWeight.ExtraBold,
-                                color = PureWhite,
-                                fontSize = 15.sp,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
-                        }
-                        Box(modifier = Modifier.width(1.dp).height(30.dp).background(BorderGray))
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                            Text("HABIT TICKS", fontSize = 10.sp, color = MutedTextDark, fontWeight = FontWeight.Bold)
-                            val tickedToday = habits.count { it.completionDates.split(",").contains(todayDate) }
-                            Text(
-                                text = "$tickedToday / ${habits.size}",
-                                fontWeight = FontWeight.ExtraBold,
-                                color = PureWhite,
-                                fontSize = 15.sp,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
+
+                        // Tasks Done Card
+                        Card(
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.3f)),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("MISSIONS DONE", fontSize = 9.sp, color = Color.White.copy(alpha = 0.4f), fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                                Row(
+                                    verticalAlignment = Alignment.Bottom,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                ) {
+                                    Text(
+                                        text = String.format(Locale.US, "%02d", todayCompletedTasks.size),
+                                        fontWeight = FontWeight.Black,
+                                        color = PureWhite,
+                                        fontSize = 24.sp
+                                    )
+                                    Text(
+                                        text = " finished",
+                                        color = Color.White.copy(alpha = 0.3f),
+                                        fontSize = 11.sp,
+                                        modifier = Modifier.padding(bottom = 3.dp, start = 2.dp)
+                                    )
+                                }
+                                Box(modifier = Modifier.padding(top = 8.dp).width(24.dp).height(3.dp).background(Color.White.copy(alpha = 0.2f), CircleShape))
+                            }
                         }
                     }
                 }
@@ -523,30 +582,48 @@ fun DashboardScreen(viewModel: XPViewModel, onNavigateToScreen: (String) -> Unit
             }
         }
 
-        // Daily Motivation Quote Card
+        // Gemini AI Coach Suggestion Card (Sleek Theme High Contrast White background)
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = TechOrange),
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(containerColor = PureWhite),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(SolidBlack, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .background(TechOrange, CircleShape)
+                            )
+                        }
+                        Text(
+                            text = "GEMINI AI COACH",
+                            color = SolidBlack,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
+                        )
+                    }
                     Text(
-                        text = "\"Consistency always outperforms pure talent. The small XP multipliers you stack today build Level 10 Legend Status tomorrow.\"",
-                        color = PureWhite,
+                        text = "\"Your study productivity is at a 7-day high. Crush your pending Daily Missions today to hit the next level by tonight! Consistency stacks massive multipliers.\"",
+                        color = SolidBlack,
                         fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "- VEXA SYSTEM MATRIX COUNSEL",
-                        color = PureWhite.copy(alpha = 0.8f),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.fillMaxWidth()
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp
                     )
                 }
             }

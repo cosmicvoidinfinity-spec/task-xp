@@ -52,11 +52,19 @@ fun VexaAIScreen(viewModel: XPViewModel) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "🤖 VEXA INTERFACE SYLLABUS UNIT",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Black,
+                    text = "ACADEMIC WARRIOR",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp,
                     color = TechOrange
                 )
+                Text(
+                    text = "VEXA AI ADVISOR",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Black,
+                    color = PureWhite
+                )
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Tactical Gemini-API study diagnostics analyzer.",
                     fontSize = 12.sp,
@@ -66,7 +74,7 @@ fun VexaAIScreen(viewModel: XPViewModel) {
             IconButton(
                 onClick = { viewModel.triggerVexaAnalysis() },
                 modifier = Modifier
-                    .border(1.dp, TechOrange, RoundedCornerShape(12.dp))
+                    .border(1.dp, BorderGray, RoundedCornerShape(20.dp))
                     .background(MatteBlack)
                     .testTag("vexa_refresh_button")
             ) {
@@ -81,8 +89,8 @@ fun VexaAIScreen(viewModel: XPViewModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .clip(RoundedCornerShape(20.dp))
-                .border(1.dp, BorderGray, RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(32.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(32.dp))
                 .background(MatteBlack)
                 .padding(16.dp)
                 .testTag("vexa_report_container")

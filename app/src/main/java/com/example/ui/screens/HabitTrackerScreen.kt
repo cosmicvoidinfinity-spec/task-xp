@@ -57,20 +57,30 @@ fun HabitTrackerScreen(viewModel: XPViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "🌱 HABIT FORGE MATRIX",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Black,
-                    color = TechOrange
-                )
+                Column {
+                    Text(
+                        text = "ACADEMIC WARRIOR",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp,
+                        color = TechOrange
+                    )
+                    Text(
+                        text = "HABIT FORGE",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Black,
+                        color = PureWhite
+                    )
+                }
                 Button(
                     onClick = { showAddHabitDialog = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = TechOrange, contentColor = PureWhite),
+                    colors = ButtonDefaults.buttonColors(containerColor = TechOrange, contentColor = SolidBlack),
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.testTag("add_habit_button")
                 ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add Habit")
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add Habit", tint = SolidBlack)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("ADD HABIT", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                    Text("CREATE", fontWeight = FontWeight.Bold, fontSize = 11.sp, color = SolidBlack)
                 }
             }
         }
@@ -101,7 +111,8 @@ fun HabitTrackerScreen(viewModel: XPViewModel) {
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    border = BorderStroke(0.5.dp, BorderGray),
+                    shape = RoundedCornerShape(24.dp),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
                     colors = CardDefaults.cardColors(containerColor = MatteBlack)
                 ) {
                     Column(

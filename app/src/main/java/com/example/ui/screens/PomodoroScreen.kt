@@ -63,18 +63,31 @@ fun PomodoroScreen(viewModel: XPViewModel) {
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         // Pomodoro header
-        Text(
-            text = "⏱️ CYCLIC FOCUS CLOCK",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Black,
-            color = TechOrange
-        )
-        Text(
-            text = "Initiate a 25-minute study sprint. Completing a full Focus Cycle grants +20 XP instantly.",
-            fontSize = 12.sp,
-            color = MutedTextDark,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Text(
+                text = "ACADEMIC WARRIOR",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp,
+                color = TechOrange
+            )
+            Text(
+                text = "FOCUS CLOCK",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Black,
+                color = PureWhite
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Initiate a 25-minute study sprint. Completing a full Focus Cycle grants +20 XP instantly.",
+                fontSize = 12.sp,
+                color = MutedTextDark,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
 

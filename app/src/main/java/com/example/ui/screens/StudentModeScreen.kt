@@ -47,13 +47,21 @@ fun StudentModeScreen(viewModel: XPViewModel, onNavigateToVexa: () -> Unit) {
     ) {
         // Study header
         item {
-            Column {
+            Column(modifier = Modifier.padding(bottom = 8.dp)) {
                 Text(
-                    text = "🎓 CLASS 9 SYLLABUS DIRECTORY",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Black,
+                    text = "ACADEMIC WARRIOR",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp,
                     color = TechOrange
                 )
+                Text(
+                    text = "SYLLABUS DIRECTORY",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Black,
+                    color = PureWhite
+                )
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Record training sessions and test metrics under key subjects to log multiplayer multipliers.",
                     fontSize = 12.sp,
@@ -85,7 +93,8 @@ fun StudentModeScreen(viewModel: XPViewModel, onNavigateToVexa: () -> Unit) {
                                         selectedSubject = sub
                                         showLogDialog = true
                                     },
-                                border = BorderStroke(0.5.dp, BorderGray),
+                                shape = RoundedCornerShape(24.dp),
+                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
                                 colors = CardDefaults.cardColors(containerColor = MatteBlack)
                             ) {
                                 Column(

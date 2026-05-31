@@ -63,21 +63,29 @@ fun TaskManagerScreen(viewModel: XPViewModel) {
                 .padding(16.dp)
         ) {
             // Task List Header
-            Text(
-                text = "🛡️ STAGE MISSIONS & QUESTS",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Black,
-                color = TechOrange,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
+            Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                Text(
+                    text = "ACADEMIC WARRIOR",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp,
+                    color = TechOrange
+                )
+                Text(
+                    text = "MISSIONS & QUESTS",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Black,
+                    color = PureWhite
+                )
+            }
 
             // Segmented Filters Pending vs Completed
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
-                    .border(1.dp, BorderGray, RoundedCornerShape(12.dp))
-                    .clip(RoundedCornerShape(12.dp))
+                    .border(1.dp, BorderGray, RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(MatteBlack)
             ) {
                 listOf("Pending", "Completed").forEach { tab ->
@@ -135,7 +143,8 @@ fun TaskManagerScreen(viewModel: XPViewModel) {
                     items(filteredTasks, key = { it.id }) { task ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            border = BorderStroke(0.5.dp, BorderGray),
+                            shape = RoundedCornerShape(24.dp),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
                             colors = CardDefaults.cardColors(containerColor = MatteBlack)
                         ) {
                             Row(

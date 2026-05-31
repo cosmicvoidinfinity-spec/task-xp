@@ -1,0 +1,6 @@
+{
+  "name": "XP Student Planner",
+  "description": "A gamified productivity study planner, task manager, habit tracker, and AI coach for Class 9 students.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
